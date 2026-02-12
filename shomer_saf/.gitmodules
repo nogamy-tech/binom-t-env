@@ -1,0 +1,18 @@
+[submodule "modules/document-start-job"]
+	path = modules/document-start-job
+	url = https://github.com/nogamy-tech/document-start-job.git
+[submodule "modules/document-process-query"]
+	path = modules/document-process-query
+	url = https://github.com/nogamy-tech/document-process-query.git
+[submodule "modules/document-pre-processing"]
+	path = modules/document-pre-processing
+	url = https://github.com/nogamy-tech/document-pre-processing.git
+[submodule "modules/document-clear-db"]
+	path = modules/document-clear-db
+	url = https://github.com/nogamy-tech/document-clear-db.git
+[submodule "modules/document-query-get"]
+	path = modules/document-query-get
+	url = https://github.com/nogamy-tech/document-query-get.git
+[submodule "modules/document-page-processing"]
+	path = modules/document-page-processing
+	url = https://github.com/nogamy-tech/document-page-processing.git

@@ -1,0 +1,30 @@
+main:
+  params: [args]
+  steps:
+    - call_func:
+        parallel:
+          for:
+            value: page_index
+            range:
+              - ${args.start_page}
+              - ${args.end_page}
+            steps:
+              - call_task:
+                  call: http.post
+                  args:
+                    url: ${DOCUMENT_PAGE_PROCESSING_URI}/shomer-saf/PageProcessing/Document/PageProcessing
+                    auth:
+                      type: OIDC
+                      audience: "${DOCUMENT_PAGE_PROCESSING_URI}"
+                    headers:
+                      Content-Type: application/json
+                    body:
+                      BucketSubPath: ${args.bucket_sub_path}
+                      DataBucketFolder: ${args.data_bucket_folder}
+                      DnaTransactionId: ${args.dna_transaction_id}
+                      Model: "Text"
+                      PageNumber: ${page_index}
+                      PagesBucketFolder: ${args.pages_bucket_folder}
+                      RequestId: ${args.RequestId}
+                      Timestamp: ${args.Timestamp}
+                      Version: ${args.Version}

@@ -1,0 +1,17 @@
+dotenv
+flasgger
+flask-cors
+flask-limiter
+functions-framework
+google-api-core
+google-auth
+google-cloud-firestore
+google-cloud-secret-manager
+google-cloud-storage
+google-cloud-workflows
+pillow
+pydantic
+pymupdf
+tomli
+tomli-w
+google-cloud-logging>=3.0.0

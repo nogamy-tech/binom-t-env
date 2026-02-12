@@ -1,0 +1,170 @@
+
+# create cloud function: I transform the nodejs function to python function and adapted the terraform code 
+
+# https://cloud.google.com/functions/docs/tutorials/terraform-pubsub
+# https://github.com/GoogleCloudPlatform/functions-framework-python
+# https://github.com/terraform-google-modules/terraform-docs-samples/tree/main/functions/pubsub/function-source
+
+
+
+
+
+
+locals {
+  labels = {
+
+    environment = terraform.workspace
+    module      = "${var.module_type}-${var.function_name}"
+    # "${var.module_name}:${var.function_name}"
+    version = var.module_version
+    owner   = var.module_owner
+    project = var.project
+
+
+  }
+}
+
+
+
+
+# # 1.Archive the function source code (main.py + requirements.txt)
+# data "archive_file" "function_zip" {
+#   type        = "zip"
+#   # Where Terraform writes the ZIP file on local machine (tempoaraily)
+#   output_path = "${path.root}/tmp/${var.function_name}-src.zip"
+#   # Folder whose contents are zipped
+#   source_dir  = var.source_dir
+#   # source_dir  = "${var.path_}/${var.source_folder}"
+# }
+
+# # 2. Upload ZIP to (pre existing) GCS bucket
+# resource "google_storage_bucket_object" "function_archive" {
+#   name   = "${var.function_name}/function.zip"
+#   # bucket = google_storage_bucket.function_bucket.name
+#   bucket = var.bucket_name
+#   source = data.archive_file.function_zip.output_path
+# }
+
+# # 3. delete zip from local pc after function is deployed
+# resource "null_resource" "cleanup_zip" {
+#   depends_on = [google_storage_bucket_object.function_archive]
+
+#   provisioner "local-exec" {
+#     command = "del /f ${path.root}\\tmp\\${var.function_name}-src.zip"
+#     interpreter = ["cmd", "/C"]
+#   }
+# }
+
+
+# 4. Deploy the Source Code to Cloud Run Functions with HTTP Configurations
+resource "google_cloudfunctions2_function" "python_function" {
+  #name     = var.function_name
+  name    = "cf-nogamy-${var.function_name}"
+  project = var.project_id
+
+  location    = var.region
+  description = "A Python Cloud Function deployed via Terraform"
+  labels      = local.labels
+
+  build_config {
+    runtime     = var.runtime
+    entry_point = var.entry_point
+    source {
+      storage_source {
+
+        bucket = var.bucket_name
+        # object = google_storage_bucket_object.function_archive.name
+        object = "${var.function_name}/function.zip"
+
+      }
+    }
+  }
+
+  service_config {
+    min_instance_count               = 1
+    max_instance_count               = 5
+    max_instance_request_concurrency = 100
+    available_cpu                    = tonumber(var.cpu)
+    available_memory                 = var.memory
+    timeout_seconds                  = tonumber(var.timeout_seconds)
+    ingress_settings                 = "ALLOW_INTERNAL_ONLY"
+    vpc_connector                    = var.vpc_connector
+    vpc_connector_egress_settings    = "ALL_TRAFFIC"
+    service_account_email            = var.service_account_email
+    # Send 100 % of traffic to the most recently deployed revision
+    all_traffic_on_latest_revision = true
+  }
+  # # Don’t try to create this Cloud Function until the ZIP has been uploaded
+  # depends_on = [
+  #   # module.nogamy_sa,
+  #   google_storage_bucket_object.function_archive
+  #   ]
+  # Secrets or config values needed by function at runtime: URLs, bucket names, toggles, etc.
+  # can be called in code: print(os.environ["SERVICE_CONFIG_TEST"])
+  # environment_variables = {
+  #   SERVICE_CONFIG_TEST = "config_test"
+  # }
+  # }
+  #   event_trigger {
+  #   trigger_region = var.region
+  #   event_type     = "google.cloud.functions.v2.trigger.http"
+  # }
+
+
+
+
+}
+
+# 5. Set vpc_egress_settings (required to connect via vpc)
+# use gcloud to over-ride terraform limitation in setting vpc_egress_settings
+# requires to be logged using: gcloud auth login
+# resource "null_resource" "function_vpc_egress" {
+#   depends_on = [google_cloudfunctions2_function.python_function]
+#   provisioner "local-exec" {
+#     command = "gcloud run services update ${google_cloudfunctions2_function.python_function.name} --region=${var.region} --vpc-egress=all-traffic --vpc-connector=${var.vpc_connector} --project=${var.project_id}"
+#   }
+# }
+
+
+
+
+
+# 5️⃣ Allow public invocation
+resource "google_cloudfunctions2_function_iam_member" "invoker" {
+  cloud_function = google_cloudfunctions2_function.python_function.name
+  location       = var.region
+  role           = "roles/cloudfunctions.invoker"
+  member         = "allUsers"
+}
+
+# 6️⃣ Allow unauthenticated access via Cloud Run (required for Gen2 public functions)
+resource "google_cloud_run_service_iam_member" "run_invoker" {
+  location = var.region
+  project  = var.project_id
+  service  = google_cloudfunctions2_function.python_function.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
+
+
+
+# # # output "my_message" {
+# # #   value = "bucket created: ${var.function_name}"
+# # # }
+
+
+
+
+
+
+# # resource "null_resource" "deploy_cloud_function" {
+# #   triggers = {
+# #     always_run = timestamp()  # forces re-run every time you apply
+# #   }
+# #   provisioner "local-exec" {
+# #     command = <<EOT
+# #        gcloud functions deploy ${var.function_name}   --service-account=${var.service_account_email}     --source=${var.path_}/${var.function_name}   --entry-point=${var.entry_point}      --project=${var.project_id}   --region=${var.region}   --vpc-connector=${var.vpc_connector}   --timeout=${var.timeout_seconds}s --memory=${var.memory}i --cpu=${var.cpu}  --max-instances=${var.max_instances} --runtime=${var.runtime}   --gen2 --trigger-http   --ingress-settings=internal-only --no-allow-unauthenticated --egress-settings=all 
+# #     EOT
+# #   }
+# # }

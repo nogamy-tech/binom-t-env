@@ -1,0 +1,100 @@
+main:
+  params: [args]
+  steps:
+    - call_DocumentPreProcessing:
+        call: http.post
+        args:
+          url: ${DOCUMENT_PRE_PROCESSING_URI}/shomer-saf/PreProcessing/Document/PreProcessing
+          auth:
+            type: OIDC
+            audience: "${DOCUMENT_PRE_PROCESSING_URI}"
+          headers:
+            Content-Type: application/json
+          body:
+            BucketSubPath: ${args.BucketSubPath}
+            DnaTransactionId: ${args.DnaTransactionId}
+            DocumentsBucketFolder: ${args.DocumentsBucketFolder}
+            PagesBucketFolder: ${args.PagesBucketFolder}
+            RequestId: ${args.RequestId}
+            Timestamp: ${args.Timestamp}
+            Version: ${args.Version}
+
+    - init_vars:
+        assign:
+          - projectId: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+          - queries: ${args.Queries}
+          - queries_count: ${len(args.Queries)}
+          - page_count: ${int(args.PageCount)}
+          - batch_size: 20
+          - total_batches_func2: ${int((page_count + batch_size - 1) / batch_size)}
+          - total_runs: ${page_count * queries_count}
+          - total_batches_func3: ${int((total_runs  + batch_size - 1) / batch_size)}
+
+    - call_DocumentPageProcessing_parallel:
+        parallel:
+          concurrency_limit: 20   
+          for:
+            value: batc_index
+            range:
+              - 0
+              - ${total_batches_func2 - 1}
+            steps:
+              - set_DocumentPageProcessing_parameters:
+                  assign:
+                    - start_page: ${batc_index * batch_size}
+                    - end_page_calc: ${(batc_index + 1) * batch_size}
+                    - end_page: ${if(end_page_calc > page_count, page_count, end_page_calc) -1 }
+                    - request_data:
+                        start_page: ${start_page}
+                        end_page: ${end_page}
+                        bucket_sub_path: ${args.BucketSubPath}
+                        data_bucket_folder: ${args.DataBucketFolder}
+                        dna_transaction_id: ${args.DnaTransactionId}
+                        Model: "Text"
+                        pages_bucket_folder: ${args.PagesBucketFolder}
+                        RequestId: ${args.RequestId}
+                        Timestamp: ${args.Timestamp}
+                        Version: ${args.Version}
+
+
+              - call_child:
+                  call: googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run
+                  args:
+                    workflow_id: "wf-binom-DocumentPageProcessing"
+                    argument: ${request_data}
+                   
+
+    - call_DocumentProcessQuery_parallel:
+        parallel:
+          concurrency_limit: 20   
+          for:
+            value: batc_index
+            range:
+              - 0
+              - ${total_batches_func3 - 1}
+            steps:
+              - set_DocumentProcessQuery_parameters:
+                  assign:
+                    - start_run: ${batc_index * batch_size}
+                    - end_run_calc: ${(batc_index + 1) * batch_size}
+                    - end_run: ${if(end_run_calc > total_runs, total_runs, end_run_calc) -1 }
+                    - request_data:
+                        start_run: ${start_run}
+                        end_run: ${end_run}
+                        queries: ${queries}
+                        queries_count: ${queries_count}
+                        bucket_sub_path: ${args.BucketSubPath}
+                        data_bucket_folder: ${args.DataBucketFolder}
+                        dna_transaction_id: ${args.DnaTransactionId}
+                        RequestId: ${args.RequestId}
+                        Timestamp: ${args.Timestamp}
+                        Version: ${args.Version}
+
+
+              - call_child3:
+                  call: googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run
+                  args:
+                    workflow_id: "wf-binom-DocumentProcessQuery"
+                    argument: ${request_data}
+
+  

@@ -1,0 +1,13 @@
+dotenv
+flasgger
+flask-cors
+flask-limiter
+functions-framework
+google-api-core
+google-auth
+pydantic
+tomli
+tomli-w
+google-cloud-secret-manager
+google-cloud-storage
+google-cloud-firestore

@@ -1,0 +1,22 @@
+[project]
+image_model_name = "gemini-2.5-pro"
+text_model_name = "gemini-2.5-flash"
+processor_id = "projects/dgt-gcp-cgov-d-i-binom/locations/eu/processors/cd06ac88e6622f1b"
+location = "eu"
+region = "me-west1"
+db_name = "firestore-shomer-saf"
+accounts_db = "firestore-accounts-db-temporary"
+collection_name = "data"
+accounts_collection = "accounts"
+workflow_name = "parent_workflow"
+bucket = "bucket_shomer_saf-dgt-gcp-cgov-d-i-binom-c0d9ec3999"
+documents_bucket = "documents_bucket_folder"
+pages_bucket = "pages_bucket_folder"
+data_bucket = "data_bucket_folder"
+time_to_clear_firestore = 1
+time_to_clear_buckets = 1
+
+[paths]
+project_dir = "C:\\Users\\RivkiHofman\\OneDrive - נוגמי\\שולחן העבודה\\Binom\\document-pre-processing\\app"
+data_dir = "C:\\Users\\RivkiHofman\\OneDrive - נוגמי\\שולחן העבודה\\Binom\\document-pre-processing\\app\\data"
+prompt_path = "C:\\Users\\RivkiHofman\\OneDrive - נוגמי\\שולחן העבודה\\Binom\\document-pre-processing\\app\\logic\\utils\\config\\base_prompt.txt"

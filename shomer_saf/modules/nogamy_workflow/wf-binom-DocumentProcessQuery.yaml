@@ -1,0 +1,37 @@
+main:
+  params: [args]
+  steps:
+    - set_params_input:
+        assign:
+          - queries: ${args.queries}
+          - queries_count: ${len(args.queries)} 
+    - call_func:
+        parallel:
+          for:
+            value: run_index
+            range:
+              - ${args.start_run}
+              - ${args.end_run}
+            steps:
+              - prepare_query:
+                  assign:
+                    - current_query: ${queries[run_index % queries_count]}
+                    - current_page: ${int(run_index / queries_count)}  
+              - call_task:
+                  call: http.post
+                  args:
+                    url: ${DOCUMENT_PROCESS_QUERY_URI}/shomer-saf/ProcessQuery/Document/ProcessQuery
+                    auth:
+                      type: OIDC
+                      audience: "${DOCUMENT_PROCESS_QUERY_URI}"
+                    headers:
+                      Content-Type: application/json
+                    body:
+                      BucketSubPath: ${args.bucket_sub_path}
+                      DataBucketFolder: ${args.data_bucket_folder}
+                      DnaTransactionId: ${args.dna_transaction_id}
+                      PageNumber: ${string(current_page)}
+                      Query: ${current_query}
+                      RequestId: ${args.RequestId}
+                      Timestamp: ${args.Timestamp}
+                      Version: ${args.Version}

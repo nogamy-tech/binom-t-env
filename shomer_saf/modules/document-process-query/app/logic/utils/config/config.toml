@@ -1,0 +1,22 @@
+[project]
+image_model_name = "gemini-2.5-pro"
+text_model_name = "gemini-2.5-flash"
+processor_id = "projects/dgt-gcp-cgov-d-datapro/locations/eu/processors/24a69973cc80945d"
+location = "eu"
+region = "me-west1"
+db_name = "firestore-shomer-saf"
+accounts_db = "firestore-accounts-db-temporary"
+collection_name = "data"
+accounts_collection = "accounts"
+workflow_name = "nogamy_test"
+bucket = "bucket_shomer_saf-f52e9dca45fcaf7c"
+documents_bucket = "documents_bucket_folder"
+pages_bucket = "pages_bucket_folder"
+data_bucket = "data_bucket_folder"
+time_to_clear_firestore = 2
+time_to_clear_buckets = 1
+
+[paths]
+project_dir = "C:\\Users\\ShayDondik\\OneDrive - נוגמי\\Desktop\\document-process-query\\app"
+data_dir = "C:\\Users\\ShayDondik\\OneDrive - נוגמי\\Desktop\\document-process-query\\app\\data"
+prompt_path = "C:\\Users\\ShayDondik\\OneDrive - נוגמי\\Desktop\\document-process-query\\app\\logic\\utils\\config\\base_prompt.txt"

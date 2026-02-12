@@ -1,0 +1,22 @@
+[project]
+image_model_name = "gemini-2.5-pro"
+text_model_name = "gemini-2.5-flash"
+processor_id = "projects/labor-459609/locations/eu/processors/a70ff8e8ef5205d0"
+location = "eu"
+region = "me-west1"
+db_name = "firestore-shomer-saf"
+accounts_db = "firestore-accounts-db-temporary"
+collection_name = "data"
+accounts_collection = "accounts"
+workflow_name = "wf-binom-parent"
+bucket = "bucket_shomer_saf-labor-459609-57c86908f6"
+documents_bucket = "documents_bucket_folder"
+pages_bucket = "pages_bucket_folder"
+data_bucket = "data_bucket_folder"
+time_to_clear_firestore = 1
+time_to_clear_buckets = 1
+
+[paths]
+project_dir = "C:\\Users\\ShayDondik\\OneDrive - נוגמי\\Desktop\\document-query-get\\app"
+data_dir = "C:\\Users\\ShayDondik\\OneDrive - נוגמי\\Desktop\\document-query-get\\app\\data"
+prompt_path = "C:\\Users\\ShayDondik\\OneDrive - נוגמי\\Desktop\\document-query-get\\app\\logic\\utils\\config\\base_prompt.txt"
