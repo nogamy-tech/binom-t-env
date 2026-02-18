@@ -1,1 +1,0 @@
-from .main_process import clear_db_process

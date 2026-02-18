@@ -171,6 +171,7 @@ module "http_cloud_functions" {
 }
 
 
+
 # # delete bucket after functions are deployed
 # resource "null_resource" "cleanup_function_bucket" {
 #   depends_on = [module.http_cloud_functions]
